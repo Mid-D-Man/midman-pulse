@@ -1,10 +1,15 @@
+
 name: Generate Project Structure
+
 
 on:
   workflow_dispatch:
 
+
 permissions:
   contents: write
+  workflows: write
+
 
 jobs:
   generate:
@@ -67,4 +72,38 @@ jobs:
           git config --local user.name "GitHub Action"
           git add .
           git commit -m "Generate project structure" || echo "No changes to commit"
+          git push          touch src/lib/components/layout/Nav.svelte
+          touch src/lib/components/layout/Footer.svelte
+          touch src/lib/components/feed/ArticleCard.svelte
+          touch src/lib/components/feed/ArticleFeed.svelte
+          touch src/lib/components/feed/CategoryFilter.svelte
+          touch src/lib/components/ui/Badge.svelte
+          touch src/lib/components/ui/Skeleton.svelte
+          touch src/lib/components/ads/AdSlot.svelte
+          touch src/lib/server/db.ts
+          touch src/lib/stores/theme.ts
+          touch src/lib/types.ts
+          touch src/lib/routes/+layout.svelte
+          touch src/lib/routes/+layout.server.ts
+          touch src/lib/routes/+page.svelte
+          touch src/lib/routes/+page.server.ts
+          touch src/lib/routes/[category]/+page.svelte
+          touch src/lib/routes/[category]/+page.server.ts
+          touch src/lib/routes/article/[slug]/+page.svelte
+          touch src/lib/routes/article/[slug]/+page.server.ts
+          touch src/lib/routes/api/ingest/+server.ts
+          touch package.json
+          touch svelte.config.js
+          touch vite.config.ts
+          touch tsconfig.json
+          touch tailwind.config.js
+          touch wrangler.toml
+      
+      - name: Commit and push
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Generate project structure" || echo "No changes to commit"
           git push
+
