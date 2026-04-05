@@ -1,0 +1,84 @@
+name: Create D1 Database and Schema
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install wrangler
+        run: npm install -g wrangler
+
+      - name: Create D1 database
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          echo "Creating D1 database..."
+          wrangler d1 create midman-pulse-db 2>&1 || echo "Database may already exist, continuing"
+
+      - name: List databases to get ID
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          echo "=== Your D1 databases ==="
+          wrangler d1 list
+
+      - name: Run schema
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          wrangler d1 execute midman-pulse-db --remote --command "
+            CREATE TABLE IF NOT EXISTS mmp_categories (
+              id          INTEGER PRIMARY KEY AUTOINCREMENT,
+              slug        TEXT    NOT NULL UNIQUE,
+              label       TEXT    NOT NULL,
+              description TEXT
+            );
+
+            CREATE TABLE IF NOT EXISTS mmp_articles (
+              id           INTEGER PRIMARY KEY AUTOINCREMENT,
+              slug         TEXT    NOT NULL UNIQUE,
+              title        TEXT    NOT NULL,
+              summary      TEXT    NOT NULL,
+              content      TEXT,
+              source_url   TEXT    NOT NULL,
+              source_name  TEXT    NOT NULL,
+              category     TEXT    NOT NULL,
+              image_url    TEXT,
+              published_at TEXT    NOT NULL,
+              created_at   TEXT    NOT NULL DEFAULT (datetime('now')),
+              is_featured  INTEGER NOT NULL DEFAULT 0
+            );
+
+            CREATE TABLE IF NOT EXISTS mmp_article_tags (
+              article_id INTEGER NOT NULL,
+              tag        TEXT    NOT NULL,
+              PRIMARY KEY (article_id, tag)
+            );
+
+            CREATE INDEX IF NOT EXISTS mmp_articles_category  ON mmp_articles(category);
+            CREATE INDEX IF NOT EXISTS mmp_articles_published ON mmp_articles(published_at DESC);
+            CREATE INDEX IF NOT EXISTS mmp_articles_featured  ON mmp_articles(is_featured);
+            CREATE INDEX IF NOT EXISTS mmp_tags_article       ON mmp_article_tags(article_id);
+
+            INSERT OR IGNORE INTO mmp_categories (slug, label, description) VALUES
+              ('ai',            'Agentic AI',    'Autonomous AI agents, LLMs, and AI-driven automation'),
+              ('cybersecurity', 'Cybersecurity', 'Threat intelligence, security tools, and audits'),
+              ('business',      'Business',      'Arbitrage, prediction markets, and profit automation');
+          "
