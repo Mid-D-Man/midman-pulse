@@ -14,7 +14,7 @@
     All
   </a>
   {#each categories as cat}
-    
+    <a
       href="/{cat.slug}"
       class="filter-chip"
       class:filter-chip--active={active === cat.slug}
