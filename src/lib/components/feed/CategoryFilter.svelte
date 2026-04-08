@@ -6,7 +6,7 @@
 </script>
 
 <div class="filter-bar">
-  
+  <a
     href="/"
     class="filter-chip"
     class:filter-chip--active={active === 'all'}
