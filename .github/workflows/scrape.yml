@@ -2,7 +2,7 @@ name: Scrape and Ingest Articles
 
 on:
   schedule:
-    - cron: '0 */8 * * *'
+    - cron: '0 */12 * * *'
   workflow_dispatch:
 
 jobs:
@@ -25,5 +25,4 @@ jobs:
         env:
           INGEST_URL: ${{ secrets.INGEST_URL }}
           INGEST_SECRET: ${{ secrets.INGEST_SECRET }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python scripts/scrape.py
