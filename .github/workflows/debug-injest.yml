@@ -1,0 +1,33 @@
+name: Debug — Send Test Article to Ingest
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-ingest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send test article
+        env:
+          INGEST_URL: ${{ secrets.INGEST_URL }}
+          INGEST_SECRET: ${{ secrets.INGEST_SECRET }}
+        run: |
+          echo "=== Sending test article to: $INGEST_URL ==="
+
+          RESPONSE=$(curl -s -w "\n--- HTTP STATUS: %{http_code} ---" \
+            -X POST "$INGEST_URL" \
+            -H "Authorization: Bearer $INGEST_SECRET" \
+            -H "Content-Type: application/json" \
+            -d '[{
+              "title": "Test Article — Cloudflare AI Agents Reshape Enterprise Security",
+              "summary": "This is a test article inserted directly to verify the ingest pipeline is working correctly.",
+              "source_url": "https://example.com/test-article",
+              "source_name": "Test Source",
+              "category": "ai",
+              "published_at": "2026-04-08T12:00:00Z",
+              "is_featured": true,
+              "tags": ["ai", "test"]
+            }]')
+
+          echo "$RESPONSE"
