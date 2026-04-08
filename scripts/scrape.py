@@ -1,13 +1,10 @@
 import os
-import json
-import hashlib
 import datetime
 import requests
 from xml.etree import ElementTree
 
 INGEST_URL = os.environ["INGEST_URL"]
 INGEST_SECRET = os.environ["INGEST_SECRET"]
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
 FEEDS = [
     {
@@ -37,33 +34,6 @@ FEEDS = [
     },
 ]
 
-GEMINI_URL = (
-    "https://generativelanguage.googleapis.com/v1beta/models/"
-    "gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY
-)
-
-
-def summarize(title: str, raw_summary: str) -> str:
-    if not GEMINI_API_KEY:
-        return raw_summary[:300]
-
-    prompt = (
-        f"Write a 2-3 sentence factual summary of this article. "
-        f"Be direct and informative. Do not editorialize.\n\n"
-        f"Title: {title}\nContent: {raw_summary}"
-    )
-
-    try:
-        resp = requests.post(
-            GEMINI_URL,
-            json={"contents": [{"parts": [{"text": prompt}]}]},
-            timeout=15,
-        )
-        data = resp.json()
-        return data["candidates"][0]["content"]["parts"][0]["text"].strip()
-    except Exception:
-        return raw_summary[:300]
-
 
 def parse_feed(feed: dict) -> list:
     try:
@@ -89,13 +59,11 @@ def parse_feed(feed: dict) -> list:
             return (el.text or "").strip() if el is not None else ""
 
         title = get("title")
-        link = get("link")
-        raw = get("description") or get("summary") or get("content")
+        link  = get("link")
+        raw   = get("description") or get("summary") or get("content") or ""
 
         if not title or not link:
             continue
-
-        summary = summarize(title, raw)
 
         pub_raw = get("pubDate") or get("published") or get("updated")
         try:
@@ -105,16 +73,21 @@ def parse_feed(feed: dict) -> list:
         except Exception:
             published_at = datetime.datetime.utcnow().isoformat()
 
+        # Strip basic HTML tags from raw content for cleaner summarization
+        import re
+        clean_raw = re.sub(r"<[^>]+>", " ", raw).strip()
+        clean_raw = re.sub(r"\s+", " ", clean_raw)[:1000]
+
         articles.append(
             {
-                "title": title,
-                "summary": summary,
-                "source_url": link,
+                "title":       title,
+                "raw_content": clean_raw,   # server will summarize via CF AI
+                "source_url":  link,
                 "source_name": feed["source_name"],
-                "category": feed["category"],
+                "category":    feed["category"],
                 "published_at": published_at,
                 "is_featured": False,
-                "tags": [feed["category"]],
+                "tags":        [feed["category"]],
             }
         )
 
@@ -144,7 +117,10 @@ def main():
     )
 
     print(f"Ingest status: {resp.status_code}")
-    print(resp.json())
+    try:
+        print(resp.json())
+    except Exception:
+        print(resp.text)
 
 
 if __name__ == "__main__":
