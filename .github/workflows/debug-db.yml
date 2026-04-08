@@ -1,0 +1,52 @@
+name: Debug — Check D1 Database Contents
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install wrangler
+        run: npm install -g wrangler
+
+      - name: Check article count
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          echo "=== Article count ==="
+          wrangler d1 execute midman-pulse-db --remote --command "SELECT COUNT(*) as total FROM mmp_articles;"
+
+          echo "=== Category count ==="
+          wrangler d1 execute midman-pulse-db --remote --command "SELECT COUNT(*) as total FROM mmp_categories;"
+
+          echo "=== Latest 3 articles ==="
+          wrangler d1 execute midman-pulse-db --remote --command "SELECT id, title, category, published_at, created_at FROM mmp_articles ORDER BY created_at DESC LIMIT 3;"
+
+          echo "=== Categories ==="
+          wrangler d1 execute midman-pulse-db --remote --command "SELECT * FROM mmp_categories;"
+
+      - name: Check INGEST_URL and INGEST_SECRET are set
+        env:
+          INGEST_URL: ${{ secrets.INGEST_URL }}
+          INGEST_SECRET: ${{ secrets.INGEST_SECRET }}
+        run: |
+          echo "=== Secret presence check ==="
+          if [ -z "$INGEST_URL" ]; then
+            echo "❌ INGEST_URL secret is NOT set"
+          else
+            echo "✅ INGEST_URL is set: $INGEST_URL"
+          fi
+
+          if [ -z "$INGEST_SECRET" ]; then
+            echo "❌ INGEST_SECRET secret is NOT set"
+          else
+            echo "✅ INGEST_SECRET is set (length: ${#INGEST_SECRET})"
+          fi
