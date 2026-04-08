@@ -80,7 +80,7 @@
         {:else}
           <div class="article-no-content">
             <p>Read the full article at the source.</p>
-            
+            <a
               href={article.source_url}
               target="_blank"
               rel="noopener noreferrer"
