@@ -4,7 +4,7 @@ declare global {
       env: {
         DB: D1Database;
         INGEST_SECRET: string;
-        CF_AI?: any;
+        CF_AI: Ai;          // Cloudflare AI binding — enabled via wrangler.toml [ai]
       };
     }
   }
