@@ -2,6 +2,10 @@ name = "midman-pulse"
 compatibility_date = "2024-01-01"
 pages_build_output_dir = ".svelte-kit/cloudflare"
 
+# Cloudflare AI — free on all plans, no credit card required
+[ai]
+binding = "CF_AI"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "midman-pulse-db"
