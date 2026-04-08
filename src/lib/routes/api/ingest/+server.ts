@@ -11,18 +11,52 @@ function slugify(title: string): string {
     .slice(0, 80);
 }
 
+/**
+ * Summarize text using the Cloudflare AI binding.
+ * Uses @cf/facebook/bart-large-cnn (free on all CF plans, no credit card needed).
+ * Falls back to plain truncation if the binding is unavailable.
+ */
+async function summarize(
+  cfAi: any,
+  title: string,
+  raw: string
+): Promise<string> {
+  if (!cfAi || !raw) {
+    return raw?.slice(0, 300) ?? title;
+  }
+
+  try {
+    const input = `${title}. ${raw}`.slice(0, 1024);
+    const result = await cfAi.run('@cf/facebook/bart-large-cnn', {
+      input_text: input,
+      max_length: 130,
+    });
+    return (result?.summary ?? '').trim() || raw.slice(0, 300);
+  } catch (err) {
+    console.warn('CF AI summarization failed, using truncation:', err);
+    return raw.slice(0, 300);
+  }
+}
+
 export const POST: RequestHandler = async ({ request, platform }) => {
-  const secret = platform?.env?.INGEST_SECRET;
+  // ── auth ──────────────────────────────────────────────────────────────────
+  const secret     = platform?.env?.INGEST_SECRET;
   const authHeader = request.headers.get('Authorization') ?? '';
-  const provided = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+  const provided   = authHeader.startsWith('Bearer ')
+    ? authHeader.slice(7).trim()
+    : '';
 
   if (!secret || provided !== secret) {
     throw error(401, 'Unauthorized');
   }
 
-  const db = platform?.env?.DB;
+  // ── db / ai ───────────────────────────────────────────────────────────────
+  const db   = platform?.env?.DB;
+  const cfAi = platform?.env?.CF_AI;
+
   if (!db) throw error(500, 'Database unavailable');
 
+  // ── body ──────────────────────────────────────────────────────────────────
   let body: any;
   try {
     body = await request.json();
@@ -31,14 +65,22 @@ export const POST: RequestHandler = async ({ request, platform }) => {
   }
 
   const articles = Array.isArray(body) ? body : [body];
-
-  const results = [];
+  const results  = [];
 
   for (const item of articles) {
-    if (!item.title || !item.summary || !item.source_url || !item.source_name || !item.category) {
+    // Either a pre-built summary OR raw_content to summarize
+    const hasSummary = typeof item.summary === 'string' && item.summary.trim().length > 0;
+    const hasRaw     = typeof item.raw_content === 'string' && item.raw_content.trim().length > 0;
+
+    if (!item.title || (!hasSummary && !hasRaw) || !item.source_url || !item.source_name || !item.category) {
       results.push({ ok: false, reason: 'Missing required fields', item: item.title });
       continue;
     }
+
+    // Build summary — prefer existing, otherwise ask CF AI
+    const summary = hasSummary
+      ? item.summary
+      : await summarize(cfAi, item.title, item.raw_content);
 
     const slug = `${slugify(item.title)}-${Date.now().toString(36)}`;
 
@@ -46,7 +88,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
       const result = await insertArticle(db, {
         slug,
         title:        item.title,
-        summary:      item.summary,
+        summary,
         content:      item.content ?? null,
         source_url:   item.source_url,
         source_name:  item.source_name,
