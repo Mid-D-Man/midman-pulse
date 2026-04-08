@@ -29,9 +29,9 @@
 
     <div class="nav-links" class:open={menuOpen}>
       <a href="/" class="nav-link" class:active={isActive('/')} on:click={closeMenu}>Home</a>
-<a
+
       {#each categories as cat}
-        
+        <a
           href="/{cat.slug}"
           class="nav-link"
           class:active={isActive(`/${cat.slug}`)}
