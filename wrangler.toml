@@ -9,4 +9,4 @@ binding = "CF_AI"
 [[d1_databases]]
 binding = "DB"
 database_name = "midman-pulse-db"
-database_id = "REPLACE_AFTER_CREATION"
+database_id = "448c0be6-7e6f-495d-9357-803122664008"
