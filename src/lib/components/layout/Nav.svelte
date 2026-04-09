@@ -18,7 +18,7 @@
 <nav class="nav">
   <div class="nav-inner container">
 
-    <!-- Logo -->
+    <!-- Logo — far LEFT -->
     <a href="/" class="brand" on:click={closeMenu}>
       <div class="brand-icon">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -27,24 +27,6 @@
       </div>
       <span class="brand-name">MidMan<span class="brand-accent">Pulse</span></span>
     </a>
-
-    <!-- Hamburger — sits right next to logo on mobile -->
-    <button
-      class="hamburger"
-      on:click={() => (menuOpen = !menuOpen)}
-      aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-      aria-expanded={menuOpen}
-    >
-      {#if menuOpen}
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      {:else}
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
-        </svg>
-      {/if}
-    </button>
 
     <!-- Desktop nav links -->
     <div class="nav-links" class:open={menuOpen}>
@@ -61,12 +43,31 @@
       {/each}
     </div>
 
-    <!-- Theme toggle — always far right -->
-    <button class="theme-btn" on:click={theme.toggle} aria-label="Toggle theme">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/>
-      </svg>
-    </button>
+    <!-- Right side: theme toggle + hamburger — both far RIGHT -->
+    <div class="nav-actions">
+      <button class="theme-btn" on:click={theme.toggle} aria-label="Toggle theme">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/>
+        </svg>
+      </button>
+
+      <button
+        class="hamburger"
+        on:click={() => (menuOpen = !menuOpen)}
+        aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+        aria-expanded={menuOpen}
+      >
+        {#if menuOpen}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        {:else}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+          </svg>
+        {/if}
+      </button>
+    </div>
 
   </div>
 </nav>
@@ -84,11 +85,10 @@
   .nav-inner {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
     height: 3.5rem;
+    gap: 0.5rem;
   }
 
-  /* Logo */
   .brand {
     display: flex;
     align-items: center;
@@ -118,30 +118,11 @@
 
   .brand-accent { color: var(--accent); }
 
-  /* Hamburger — hidden on desktop, shown on mobile right after logo */
-  .hamburger {
-    display: none;
-    width: 2rem;
-    height: 2rem;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg-muted);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: color 0.15s;
-    flex-shrink: 0;
-  }
-
-  .hamburger:hover { color: var(--text); }
-
-  /* Nav links — desktop: inline row pushed right; mobile: dropdown */
   .nav-links {
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    margin-left: auto;  /* push to right on desktop */
+    margin-left: auto;
   }
 
   .nav-link {
@@ -158,7 +139,14 @@
   .nav-link:hover { color: var(--text); background: var(--bg-muted); }
   .nav-link.active { color: var(--accent); background: var(--accent-dim); }
 
-  /* Theme toggle — always visible, pushed to far right */
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 0.75rem;
+    flex-shrink: 0;
+  }
+
   .theme-btn {
     width: 2rem;
     height: 2rem;
@@ -171,19 +159,29 @@
     color: var(--text-muted);
     cursor: pointer;
     transition: color 0.15s, background 0.15s;
-    flex-shrink: 0;
-    margin-left: 0.5rem;
   }
 
   .theme-btn:hover { color: var(--text); background: var(--border); }
 
-  /* ── Mobile ── */
-  @media (max-width: 768px) {
-    .hamburger {
-      display: flex;   /* show hamburger right next to logo */
-    }
+  .hamburger {
+    display: none;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.15s;
+  }
 
-    /* nav-links become full-width dropdown below the bar */
+  .hamburger:hover { color: var(--text); }
+
+  @media (max-width: 768px) {
+    .hamburger { display: flex; }
+
     .nav-links {
       display: none;
       position: absolute;
@@ -201,9 +199,6 @@
     }
 
     .nav-links.open { display: flex; }
-
     .nav-link { padding: 0.625rem 0.75rem; }
-
-    /* theme toggle stays at the end (far right) — that's fine on mobile */
   }
 </style>
