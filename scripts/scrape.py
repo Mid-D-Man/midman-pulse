@@ -28,16 +28,10 @@ FEEDS = [
         "source_name": "Entrepreneur",
         "category": "business",
     },
-    {
-        "url": "https://feeds.harvardbusiness.org/harvardbusiness",
-        "source_name": "Harvard Business Review",
-        "category": "business",
-    },
 ]
 
 
 def strip_html(text: str) -> str:
-    """Remove HTML tags and decode common entities."""
     text = re.sub(r"<[^>]+>", " ", text)
     text = text.replace("&nbsp;", " ")
     text = text.replace("&amp;", "&")
@@ -49,6 +43,44 @@ def strip_html(text: str) -> str:
     return text
 
 
+def get_text(item, tag: str, ns: dict) -> str:
+    """
+    Safely get text from an XML element.
+    Uses explicit None check — never relies on Element truthiness,
+    which is False for leaf elements even when they have text.
+    """
+    el = item.find(tag)
+    if el is None:
+        el = item.find(f"atom:{tag}", ns)
+    if el is None:
+        return ""
+    return (el.text or "").strip()
+
+
+def get_link(item, ns: dict) -> str:
+    """
+    Links in RSS 2.0 are text nodes; in Atom they may be href attributes.
+    """
+    # RSS 2.0 style
+    el = item.find("link")
+    if el is not None and el.text and el.text.strip():
+        return el.text.strip()
+
+    # Atom style  <link href="..." />
+    el = item.find("atom:link", ns)
+    if el is not None:
+        href = el.get("href", "").strip()
+        if href:
+            return href
+
+    # Some feeds put the URL in <link> with no text but as tail
+    el = item.find("link")
+    if el is not None and el.tail and el.tail.strip().startswith("http"):
+        return el.tail.strip()
+
+    return ""
+
+
 def parse_feed(feed: dict) -> list:
     try:
         resp = requests.get(
@@ -58,13 +90,13 @@ def parse_feed(feed: dict) -> list:
         )
         resp.raise_for_status()
     except Exception as e:
-        print(f"  [SKIP] Failed to fetch {feed['url']}: {e}")
+        print(f"  [SKIP] Fetch error: {e}")
         return []
 
     try:
         root = ElementTree.fromstring(resp.content)
     except Exception as e:
-        print(f"  [SKIP] Failed to parse XML: {e}")
+        print(f"  [SKIP] XML parse error: {e}")
         return []
 
     ns    = {"atom": "http://www.w3.org/2005/Atom"}
@@ -73,45 +105,23 @@ def parse_feed(feed: dict) -> list:
 
     articles = []
     for item in items[:5]:
-
-        def get(tag: str) -> str:
-            el = item.find(tag) or item.find(f"atom:{tag}", ns)
-            if el is None:
-                return ""
-            # Some feeds put content in CDATA — el.text captures that
-            return (el.text or "").strip()
-
-        title = get("title")
-        link  = get("link")
-
-        # Some Atom feeds put link in href attribute
-        if not link:
-            link_el = item.find("link") or item.find("atom:link", ns)
-            if link_el is not None:
-                link = link_el.get("href", "")
+        title = get_text(item, "title", ns)
+        link  = get_link(item, ns)
 
         if not title or not link:
-            print(f"  [SKIP] Missing title or link")
+            print(f"  [SKIP] title={repr(title[:40])} link={repr(link[:40])}")
             continue
 
-        # Try multiple content fields
         raw = (
-            get("description")
-            or get("summary")
-            or get("content:encoded")
-            or get("content")
+            get_text(item, "description", ns)
+            or get_text(item, "summary", ns)
+            or get_text(item, "content", ns)
             or ""
         )
-        clean = strip_html(raw)[:800]
+        clean   = strip_html(raw)[:800]
+        summary = clean[:300] if len(clean) >= 30 else f"{title} — via {feed['source_name']}."
 
-        # Build a summary: prefer cleaned content, fall back to title
-        if len(clean) >= 30:
-            summary = clean[:300]
-        else:
-            summary = f"{title} — Latest news from {feed['source_name']}."
-
-        # Parse date
-        pub_raw = get("pubDate") or get("published") or get("updated") or ""
+        pub_raw      = get_text(item, "pubDate", ns) or get_text(item, "published", ns) or ""
         published_at = datetime.datetime.utcnow().isoformat()
         for fmt in (
             "%a, %d %b %Y %H:%M:%S %z",
@@ -125,19 +135,17 @@ def parse_feed(feed: dict) -> list:
             except Exception:
                 continue
 
-        articles.append(
-            {
-                "title":        title,
-                "summary":      summary,       # pre-built — server won't need to call CF AI
-                "raw_content":  clean,         # still sent so CF AI can improve it if available
-                "source_url":   link,
-                "source_name":  feed["source_name"],
-                "category":     feed["category"],
-                "published_at": published_at,
-                "is_featured":  False,
-                "tags":         [feed["category"]],
-            }
-        )
+        articles.append({
+            "title":        title,
+            "summary":      summary,
+            "raw_content":  clean,
+            "source_url":   link,
+            "source_name":  feed["source_name"],
+            "category":     feed["category"],
+            "published_at": published_at,
+            "is_featured":  False,
+            "tags":         [feed["category"]],
+        })
 
     return articles
 
@@ -150,10 +158,9 @@ def main():
         all_articles.extend(articles)
         print(f"  Collected {len(articles)} articles")
 
-    print(f"\nTotal articles to ingest: {len(all_articles)}")
-
+    print(f"\nTotal to ingest: {len(all_articles)}")
     if not all_articles:
-        print("No articles collected — nothing to send.")
+        print("Nothing to send.")
         return
 
     resp = requests.post(
@@ -166,16 +173,14 @@ def main():
         timeout=30,
     )
 
-    print(f"\nIngest HTTP status: {resp.status_code}")
+    print(f"Ingest HTTP {resp.status_code}")
     try:
-        data = resp.json()
-        results = data.get("results", [])
+        data     = resp.json()
+        results  = data.get("results", [])
         inserted = sum(1 for r in results if r.get("ok") and r.get("inserted"))
         skipped  = sum(1 for r in results if r.get("ok") and not r.get("inserted"))
         failed   = sum(1 for r in results if not r.get("ok"))
-        print(f"  Inserted: {inserted}")
-        print(f"  Skipped (duplicate): {skipped}")
-        print(f"  Failed: {failed}")
+        print(f"  Inserted: {inserted}  |  Duplicate: {skipped}  |  Failed: {failed}")
         for r in results:
             if not r.get("ok"):
                 print(f"  [FAIL] {r.get('item')} — {r.get('reason')}")
