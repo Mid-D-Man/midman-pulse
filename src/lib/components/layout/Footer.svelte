@@ -12,6 +12,7 @@
       <a href="/ai">Agentic AI</a>
       <a href="/cybersecurity">Cybersecurity</a>
       <a href="/business">Business</a>
+      <a href="/gamedev">Game Dev</a>
     </div>
     <p class="footer-copy">&copy; {year} MidManStudio. All rights reserved.</p>
   </div>
@@ -33,24 +34,12 @@
     text-align: center;
   }
 
-  .brand-name {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text);
-  }
-
+  .brand-name { font-size: 1rem; font-weight: 700; color: var(--text); }
   .brand-accent { color: var(--accent); }
 
-  .footer-tagline {
-    font-size: 0.8125rem;
-    color: var(--text-muted);
-    margin-top: 0.25rem;
-  }
+  .footer-tagline { font-size: 0.8125rem; color: var(--text-muted); margin-top: 0.25rem; }
 
-  .footer-links {
-    display: flex;
-    gap: 1.5rem;
-  }
+  .footer-links { display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; }
 
   .footer-links a {
     font-size: 0.875rem;
@@ -61,8 +50,5 @@
 
   .footer-links a:hover { color: var(--accent); }
 
-  .footer-copy {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-  }
+  .footer-copy { font-size: 0.75rem; color: var(--text-muted); }
 </style>
