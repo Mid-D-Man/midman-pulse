@@ -14,9 +14,10 @@
   }
 
   const categoryLabels: Record<string, string> = {
-    ai: 'Agentic AI',
+    ai:            'Agentic AI',
     cybersecurity: 'Cybersecurity',
-    business: 'Business',
+    business:      'Business',
+    gamedev:       'Game Dev',
   };
 </script>
 
@@ -80,9 +81,7 @@
     box-shadow: 0 4px 24px rgba(0,0,0,0.12);
   }
 
-  .card--featured .card-title {
-    font-size: 1.125rem;
-  }
+  .card--featured .card-title { font-size: 1.125rem; }
 
   .card-image-wrap {
     display: block;
@@ -98,9 +97,7 @@
     transition: transform 0.3s ease;
   }
 
-  .card:hover .card-image {
-    transform: scale(1.03);
-  }
+  .card:hover .card-image { transform: scale(1.03); }
 
   .card-body {
     display: flex;
@@ -123,9 +120,7 @@
     font-family: var(--font-mono);
   }
 
-  .card-title-link {
-    text-decoration: none;
-  }
+  .card-title-link { text-decoration: none; }
 
   .card-title {
     font-size: 1rem;
@@ -135,9 +130,7 @@
     transition: color 0.15s;
   }
 
-  .card-title-link:hover .card-title {
-    color: var(--accent);
-  }
+  .card-title-link:hover .card-title { color: var(--accent); }
 
   .card-summary {
     font-size: 0.875rem;
