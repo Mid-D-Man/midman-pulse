@@ -2,7 +2,7 @@ import { error } from '@sveltejs/kit';
 import { getArticles, getCategories } from '$lib/server/db';
 import type { PageServerLoad } from './$types';
 
-const VALID_CATEGORIES = ['ai', 'cybersecurity', 'business'];
+const VALID_CATEGORIES = ['ai', 'cybersecurity', 'business','gamedev'];
 
 export const load: PageServerLoad = async ({ params, platform, url }) => {
   if (!VALID_CATEGORIES.includes(params.category)) {
