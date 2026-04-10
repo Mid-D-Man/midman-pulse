@@ -25,7 +25,7 @@ export interface ArticleTag {
   tag: string;
 }
 
-export type CategorySlug = 'ai' | 'cybersecurity' | 'business';
+export type CategorySlug = 'ai' | 'cybersecurity' | 'business' | 'gamedev';
 
 export interface PaginatedArticles {
   articles: Article[];
