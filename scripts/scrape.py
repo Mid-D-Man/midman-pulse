@@ -8,6 +8,7 @@ INGEST_URL    = os.environ["INGEST_URL"]
 INGEST_SECRET = os.environ["INGEST_SECRET"]
 
 FEEDS = [
+    # ── Cybersecurity ─────────────────────────────────────────────
     {
         "url": "https://feeds.feedburner.com/TheHackersNews",
         "source_name": "The Hacker News",
@@ -19,69 +20,132 @@ FEEDS = [
         "category": "cybersecurity",
     },
     {
+        "url": "https://www.wired.com/feed/category/security/latest/rss",
+        "source_name": "Wired Security",
+        "category": "cybersecurity",
+    },
+
+    # ── Agentic AI ────────────────────────────────────────────────
+    {
         "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
         "source_name": "TechCrunch AI",
         "category": "ai",
     },
     {
+        "url": "https://www.wired.com/feed/tag/artificial-intelligence/latest/rss",
+        "source_name": "Wired AI",
+        "category": "ai",
+    },
+
+    # ── Business ──────────────────────────────────────────────────
+    {
         "url": "https://feeds.feedburner.com/entrepreneur/latest",
         "source_name": "Entrepreneur",
         "category": "business",
     },
+    {
+        "url": "https://www.wired.com/feed/category/business/latest/rss",
+        "source_name": "Wired Business",
+        "category": "business",
+    },
+
+    # ── Game Dev ──────────────────────────────────────────────────
+    {
+        "url": "https://www.gamedeveloper.com/rss.xml",
+        "source_name": "Game Developer",
+        "category": "gamedev",
+    },
+    {
+        "url": "https://www.gamesindustry.biz/feed",
+        "source_name": "GamesIndustry.biz",
+        "category": "gamedev",
+    },
+    {
+        "url": "https://www.rockpapershotgun.com/feed",
+        "source_name": "Rock Paper Shotgun",
+        "category": "gamedev",
+    },
 ]
+
+NAMESPACES = {
+    "atom":    "http://www.w3.org/2005/Atom",
+    "media":   "http://search.yahoo.com/mrss/",
+    "content": "http://purl.org/rss/1.0/modules/content/",
+    "dc":      "http://purl.org/dc/elements/1.1/",
+    "itunes":  "http://www.itunes.com/dtds/podcast-1.0.dtd",
+}
 
 
 def strip_html(text: str) -> str:
     text = re.sub(r"<[^>]+>", " ", text)
-    text = text.replace("&nbsp;", " ")
-    text = text.replace("&amp;", "&")
-    text = text.replace("&lt;", "<")
-    text = text.replace("&gt;", ">")
-    text = text.replace("&quot;", '"')
-    text = text.replace("&#39;", "'")
-    text = re.sub(r"\s+", " ", text).strip()
-    return text
+    for entity, char in [
+        ("&nbsp;", " "), ("&amp;", "&"), ("&lt;", "<"),
+        ("&gt;", ">"), ("&quot;", '"'), ("&#39;", "'"),
+    ]:
+        text = text.replace(entity, char)
+    return re.sub(r"\s+", " ", text).strip()
 
 
-def get_text(item, tag: str, ns: dict) -> str:
-    """
-    Safely get text from an XML element.
-    Uses explicit None check — never relies on Element truthiness,
-    which is False for leaf elements even when they have text.
-    """
+def get_text(item, tag: str) -> str:
+    """Safe text — never uses Element truthiness."""
     el = item.find(tag)
     if el is None:
-        el = item.find(f"atom:{tag}", ns)
+        for uri in NAMESPACES.values():
+            el = item.find(f"{{{uri}}}{tag}")
+            if el is not None:
+                break
     if el is None:
         return ""
     return (el.text or "").strip()
 
 
-def get_link(item, ns: dict) -> str:
-    """
-    Links in RSS 2.0 are text nodes; in Atom they may be href attributes.
-    """
-    # RSS 2.0 style
+def get_link(item) -> str:
     el = item.find("link")
-    if el is not None and el.text and el.text.strip():
+    if el is not None and el.text and el.text.strip().startswith("http"):
         return el.text.strip()
+    for uri in [NAMESPACES["atom"], ""]:
+        tag = f"{{{uri}}}link" if uri else "link"
+        for el in item.findall(tag):
+            href = el.get("href", "").strip()
+            if href.startswith("http"):
+                return href
+    el = item.find("guid")
+    if el is not None and el.text and el.text.strip().startswith("http"):
+        return el.text.strip()
+    return ""
 
-    # Atom style  <link href="..." />
-    el = item.find("atom:link", ns)
+
+def get_image(item) -> str:
+    for el in item.findall(f"{{{NAMESPACES['media']}}}content"):
+        url = el.get("url", "")
+        if url and (el.get("medium") == "image" or
+                    url.lower().endswith((".jpg", ".jpeg", ".png", ".webp"))):
+            return url
+    el = item.find(f"{{{NAMESPACES['media']}}}thumbnail")
+    if el is not None and el.get("url"):
+        return el.get("url")
+    el = item.find("enclosure")
+    if el is not None and "image" in el.get("type", "") and el.get("url"):
+        return el.get("url")
+    el = item.find(f"{{{NAMESPACES['itunes']}}}image")
     if el is not None:
-        href = el.get("href", "").strip()
-        if href:
-            return href
-
-    # Some feeds put the URL in <link> with no text but as tail
-    el = item.find("link")
-    if el is not None and el.tail and el.tail.strip().startswith("http"):
-        return el.tail.strip()
-
+        url = el.get("href", "") or (el.text or "")
+        if url:
+            return url.strip()
+    raw = get_text(item, "description") or get_text(item, "summary")
+    m = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', raw, re.IGNORECASE)
+    if m and m.group(1).startswith("http"):
+        return m.group(1)
     return ""
 
 
 def parse_feed(feed: dict) -> list:
+    for prefix, uri in NAMESPACES.items():
+        try:
+            ElementTree.register_namespace(prefix, uri)
+        except Exception:
+            pass
+
     try:
         resp = requests.get(
             feed["url"],
@@ -99,29 +163,30 @@ def parse_feed(feed: dict) -> list:
         print(f"  [SKIP] XML parse error: {e}")
         return []
 
-    ns    = {"atom": "http://www.w3.org/2005/Atom"}
-    items = root.findall(".//item") or root.findall(".//atom:entry", ns)
+    items = (
+        root.findall(".//item")
+        or root.findall(f".//{{{NAMESPACES['atom']}}}entry")
+    )
     print(f"  Found {len(items)} items")
 
     articles = []
     for item in items[:5]:
-        title = get_text(item, "title", ns)
-        link  = get_link(item, ns)
+        title = get_text(item, "title")
+        link  = get_link(item)
 
         if not title or not link:
-            print(f"  [SKIP] title={repr(title[:40])} link={repr(link[:40])}")
+            print(f"  [SKIP] title={repr(title[:50])} link={repr(link[:50])}")
             continue
 
-        raw = (
-            get_text(item, "description", ns)
-            or get_text(item, "summary", ns)
-            or get_text(item, "content", ns)
-            or ""
-        )
+        raw   = (get_text(item, "description")
+                 or get_text(item, "summary")
+                 or get_text(item, f"{{{NAMESPACES['content']}}}encoded")
+                 or "")
         clean   = strip_html(raw)[:800]
         summary = clean[:300] if len(clean) >= 30 else f"{title} — via {feed['source_name']}."
+        image   = get_image(item) or None
 
-        pub_raw      = get_text(item, "pubDate", ns) or get_text(item, "published", ns) or ""
+        pub_raw      = get_text(item, "pubDate") or get_text(item, "published") or ""
         published_at = datetime.datetime.utcnow().isoformat()
         for fmt in (
             "%a, %d %b %Y %H:%M:%S %z",
@@ -130,7 +195,7 @@ def parse_feed(feed: dict) -> list:
             "%Y-%m-%dT%H:%M:%SZ",
         ):
             try:
-                published_at = datetime.datetime.strptime(pub_raw, fmt).isoformat()
+                published_at = datetime.datetime.strptime(pub_raw.strip(), fmt).isoformat()
                 break
             except Exception:
                 continue
@@ -142,6 +207,7 @@ def parse_feed(feed: dict) -> list:
             "source_url":   link,
             "source_name":  feed["source_name"],
             "category":     feed["category"],
+            "image_url":    image,
             "published_at": published_at,
             "is_featured":  False,
             "tags":         [feed["category"]],
@@ -153,7 +219,7 @@ def parse_feed(feed: dict) -> list:
 def main():
     all_articles = []
     for feed in FEEDS:
-        print(f"\nFetching: {feed['source_name']}")
+        print(f"\nFetching: {feed['source_name']} [{feed['category']}]")
         articles = parse_feed(feed)
         all_articles.extend(articles)
         print(f"  Collected {len(articles)} articles")
