@@ -14,17 +14,15 @@
 
   function formatDate(iso: string) {
     return new Date(iso).toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
+      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
     });
   }
 
   const categoryLabels: Record<string, string> = {
-    ai: 'Agentic AI',
+    ai:            'Agentic AI',
     cybersecurity: 'Cybersecurity',
-    business: 'Business',
+    business:      'Business',
+    gamedev:       'Game Dev',
   };
 </script>
 
@@ -41,19 +39,13 @@
     <div class="article-layout">
 
       <article class="article-main">
-
         <header class="article-header">
           <div class="article-meta-row">
-            <Badge
-              label={categoryLabels[article.category] ?? article.category}
-              variant="accent"
-            />
+            <Badge label={categoryLabels[article.category] ?? article.category} variant="accent" />
             <span class="article-date">{formatDate(article.published_at)}</span>
           </div>
-
           <h1 class="article-title">{article.title}</h1>
           <p class="article-summary">{article.summary}</p>
-
           <div class="article-source-row">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/>
@@ -74,18 +66,11 @@
         <AdSlot slot="inline" />
 
         {#if article.content}
-          <div class="article-content prose">
-            {@html article.content}
-          </div>
+          <div class="article-content prose">{@html article.content}</div>
         {:else}
           <div class="article-no-content">
             <p>Read the full article at the source.</p>
-            <a
-              href={article.source_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="source-btn"
-            >
+            <a href={article.source_url} target="_blank" rel="noopener noreferrer" class="source-btn">
               Read on {article.source_name}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
@@ -101,7 +86,6 @@
             {/each}
           </div>
         {/if}
-
       </article>
 
       <aside class="article-sidebar">
@@ -109,7 +93,6 @@
           <AdSlot slot="sidebar" />
         </div>
       </aside>
-
     </div>
 
     {#if related.length > 0}
@@ -122,14 +105,11 @@
         </div>
       </section>
     {/if}
-
   </div>
 </div>
 
 <style>
-  .article-page {
-    padding: 2.5rem 0 4rem;
-  }
+  .article-page { padding: 2.5rem 0 4rem; }
 
   .article-layout {
     display: grid;
@@ -154,11 +134,7 @@
     flex-wrap: wrap;
   }
 
-  .article-date {
-    font-size: 0.8125rem;
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-  }
+  .article-date { font-size: 0.8125rem; color: var(--text-muted); font-family: var(--font-mono); }
 
   .article-title {
     font-size: clamp(1.5rem, 4vw, 2.25rem);
@@ -167,11 +143,7 @@
     line-height: 1.25;
   }
 
-  .article-summary {
-    font-size: 1.0625rem;
-    color: var(--text-muted);
-    line-height: 1.75;
-  }
+  .article-summary { font-size: 1.0625rem; color: var(--text-muted); line-height: 1.75; }
 
   .article-source-row {
     display: flex;
@@ -181,11 +153,7 @@
     color: var(--text-muted);
   }
 
-  .article-source-link {
-    color: var(--accent);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
+  .article-source-link { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
 
   .article-image-wrap {
     margin-bottom: 1.5rem;
@@ -194,19 +162,9 @@
     border: 1px solid var(--border);
   }
 
-  .article-image {
-    width: 100%;
-    display: block;
-    aspect-ratio: 16/9;
-    object-fit: cover;
-  }
+  .article-image { width: 100%; display: block; aspect-ratio: 16/9; object-fit: cover; }
 
-  .article-content {
-    margin-top: 1.5rem;
-    font-size: 0.9375rem;
-    line-height: 1.8;
-    color: var(--text);
-  }
+  .article-content { margin-top: 1.5rem; font-size: 0.9375rem; line-height: 1.8; color: var(--text); }
 
   .article-no-content {
     display: flex;
@@ -220,10 +178,7 @@
     margin-top: 1.5rem;
   }
 
-  .article-no-content p {
-    font-size: 0.9375rem;
-    color: var(--text-muted);
-  }
+  .article-no-content p { font-size: 0.9375rem; color: var(--text-muted); }
 
   .source-btn {
     display: inline-flex;
@@ -262,23 +217,10 @@
     color: var(--text-muted);
   }
 
-  .article-sidebar .sidebar-sticky {
-    position: sticky;
-    top: 5rem;
-  }
+  .article-sidebar .sidebar-sticky { position: sticky; top: 5rem; }
 
-  .related-section {
-    margin-top: 3rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--border);
-  }
-
-  .related-title {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 1.25rem;
-  }
+  .related-section { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); }
+  .related-title { font-size: 1.125rem; font-weight: 700; color: var(--text); margin-bottom: 1.25rem; }
 
   .related-grid {
     display: grid;
@@ -286,13 +228,16 @@
     gap: 1.25rem;
   }
 
+  /* Tablet */
   @media (max-width: 1024px) {
     .article-layout { grid-template-columns: 1fr; }
     .article-sidebar { display: none; }
     .related-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
+  /* Mobile */
   @media (max-width: 640px) {
+    .article-page { padding: 1.5rem 0 3rem; }
     .related-grid { grid-template-columns: 1fr; }
   }
 </style>
