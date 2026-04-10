@@ -18,7 +18,7 @@
 <nav class="nav">
   <div class="nav-inner container">
 
-    <!-- Logo — far LEFT -->
+    <!-- FAR LEFT: logo + name -->
     <a href="/" class="brand" on:click={closeMenu}>
       <div class="brand-icon">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -28,7 +28,7 @@
       <span class="brand-name">MidMan<span class="brand-accent">Pulse</span></span>
     </a>
 
-    <!-- Desktop nav links -->
+    <!-- MIDDLE → RIGHT: nav links (desktop only) -->
     <div class="nav-links" class:open={menuOpen}>
       <a href="/" class="nav-link" class:active={isActive('/')} on:click={closeMenu}>Home</a>
       {#each categories as cat}
@@ -43,7 +43,7 @@
       {/each}
     </div>
 
-    <!-- Right side: theme toggle + hamburger — both far RIGHT -->
+    <!-- FAR RIGHT: theme + hamburger -->
     <div class="nav-actions">
       <button class="theme-btn" on:click={theme.toggle} aria-label="Toggle theme">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -70,6 +70,23 @@
     </div>
 
   </div>
+
+  <!-- Mobile dropdown — outside nav-inner so it spans full width -->
+  {#if menuOpen}
+    <div class="mobile-menu">
+      <a href="/" class="mobile-link" class:active={isActive('/')} on:click={closeMenu}>Home</a>
+      {#each categories as cat}
+        <a
+          href="/{cat.slug}"
+          class="mobile-link"
+          class:active={isActive(`/${cat.slug}`)}
+          on:click={closeMenu}
+        >
+          {cat.label}
+        </a>
+      {/each}
+    </div>
+  {/if}
 </nav>
 
 <style>
@@ -82,19 +99,21 @@
     backdrop-filter: blur(8px);
   }
 
+  /* ── Nav bar row ── */
   .nav-inner {
     display: flex;
     align-items: center;
     height: 3.5rem;
-    gap: 0.5rem;
   }
 
+  /* FAR LEFT */
   .brand {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     flex-shrink: 0;
     text-decoration: none;
+    margin-right: auto; /* pushes everything else to the right */
   }
 
   .brand-icon {
@@ -114,15 +133,17 @@
     font-weight: 700;
     color: var(--text);
     letter-spacing: -0.01em;
+    white-space: nowrap;
   }
 
   .brand-accent { color: var(--accent); }
 
+  /* ── Desktop nav links ── */
   .nav-links {
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    margin-left: auto;
+    margin-right: 0.75rem;
   }
 
   .nav-link {
@@ -136,14 +157,14 @@
     white-space: nowrap;
   }
 
-  .nav-link:hover { color: var(--text); background: var(--bg-muted); }
+  .nav-link:hover  { color: var(--text); background: var(--bg-muted); }
   .nav-link.active { color: var(--accent); background: var(--accent-dim); }
 
+  /* ── FAR RIGHT: actions ── */
   .nav-actions {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-left: 0.75rem;
     flex-shrink: 0;
   }
 
@@ -163,6 +184,7 @@
 
   .theme-btn:hover { color: var(--text); background: var(--border); }
 
+  /* Hamburger: hidden on desktop */
   .hamburger {
     display: none;
     width: 2rem;
@@ -179,26 +201,42 @@
 
   .hamburger:hover { color: var(--text); }
 
+  /* ── Mobile dropdown ── */
+  .mobile-menu {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 0.5rem 1rem 0.75rem;
+    gap: 0.25rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  }
+
+  .mobile-link {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    border-radius: var(--radius);
+    text-decoration: none;
+    transition: color 0.15s, background 0.15s;
+  }
+
+  .mobile-link:hover  { color: var(--text); background: var(--bg-muted); }
+  .mobile-link.active { color: var(--accent); background: var(--accent-dim); }
+
+  /* ── Breakpoints ── */
+
+  /* Tablet and below: show hamburger, hide inline nav links */
   @media (max-width: 768px) {
-    .hamburger { display: flex; }
+    .hamburger  { display: flex; }
+    .nav-links  { display: none; }
+  }
 
-    .nav-links {
-      display: none;
-      position: absolute;
-      top: 3.5rem;
-      left: 0;
-      right: 0;
-      flex-direction: column;
-      align-items: stretch;
-      background: var(--bg-surface);
-      border-bottom: 1px solid var(--border);
-      padding: 0.5rem 1rem 0.75rem;
-      gap: 0.25rem;
-      margin-left: 0;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-    }
-
-    .nav-links.open { display: flex; }
-    .nav-link { padding: 0.625rem 0.75rem; }
+  /* Small phones */
+  @media (max-width: 380px) {
+    .brand-name { font-size: 0.875rem; }
+    .brand-icon { width: 1.75rem; height: 1.75rem; }
   }
 </style>
