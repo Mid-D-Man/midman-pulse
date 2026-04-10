@@ -1,0 +1,28 @@
+name: Add Game Dev Category to D1
+
+on:
+  workflow_dispatch:
+
+jobs:
+  add-category:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install wrangler
+        run: npm install -g wrangler
+
+      - name: Insert game dev category
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          wrangler d1 execute midman-pulse-db --remote --command "
+            INSERT OR IGNORE INTO mmp_categories (slug, label, description) VALUES
+              ('gamedev', 'Game Dev', 'Game development news, tools, AI in games, and industry insights');
+          "
+          echo "=== Verify ==="
+          wrangler d1 execute midman-pulse-db --remote --command "SELECT * FROM mmp_categories;"
