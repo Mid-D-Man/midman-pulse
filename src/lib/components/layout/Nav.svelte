@@ -46,7 +46,7 @@
     <div class="nav-actions">
 
       <!-- MMS Accounts CTA — always visible on desktop -->
-      
+      <a
         href="https://mms-accounts.pages.dev"
         class="nav-mms-btn"
         target="_blank"
