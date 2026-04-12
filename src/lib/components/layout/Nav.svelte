@@ -90,7 +90,7 @@
     <div class="mobile-menu">
       <a href="/" class="mobile-link" class:active={isActive('/')} on:click={closeMenu}>Home</a>
       {#each categories as cat}
-        
+        <a
           href="/{cat.slug}"
           class="mobile-link"
           class:active={isActive(`/${cat.slug}`)}
@@ -102,7 +102,7 @@
 
       <!-- MMS CTA in mobile menu too -->
       <div class="mobile-divider" aria-hidden="true"></div>
-      
+      <a
         href="https://mms-accounts.pages.dev"
         class="mobile-mms-btn"
         target="_blank"
