@@ -12,10 +12,9 @@
     project:      { label: 'Project',      colour: '#ec4899' },
   };
 
-  $: meta      = CATEGORY_META[article.category] ?? { label: article.category, colour: 'var(--accent)' };
-  $: source    = article.source ?? 'MidManStudio';
-  $: cta       = article.cta    ?? 'Read more';
-  $: tag       = article.external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+  $: meta   = CATEGORY_META[article.category] ?? { label: article.category, colour: 'var(--accent)' };
+  $: source = article.source ?? 'MidManStudio';
+  $: cta    = article.cta    ?? 'Read more';
 
   function formatDate(iso?: string) {
     if (!iso) return '';
@@ -27,31 +26,38 @@
 
 <article class="editorial-card">
 
-  <!-- Left: image (optional) -->
+  <!-- Image (optional) -->
   {#if article.image_url}
-    
-      href={article.link}
-      class="editorial-image-wrap"
-      {...tag}
-      tabindex="-1"
-      aria-hidden="true"
-    >
-      <img
-        src={article.image_url}
-        alt={article.title}
-        class="editorial-image"
-        loading="lazy"
-      />
-    </a>
+    {#if article.external}
+      
+        href={article.link}
+        class="editorial-image-wrap"
+        target="_blank"
+        rel="noopener noreferrer"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <img src={article.image_url} alt={article.title} class="editorial-image" loading="lazy" />
+      </a>
+    {:else}
+      
+        href={article.link}
+        class="editorial-image-wrap"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <img src={article.image_url} alt={article.title} class="editorial-image" loading="lazy" />
+      </a>
+    {/if}
   {/if}
 
-  <!-- Right: content -->
+  <!-- Content -->
   <div class="editorial-body" class:editorial-body--no-image={!article.image_url}>
 
-    <!-- Top row: studio badge + category chip + date -->
+    <!-- Meta row -->
     <div class="editorial-meta">
       <span class="editorial-studio-badge">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
         </svg>
         MidManStudio
@@ -68,14 +74,20 @@
     </div>
 
     <!-- Title -->
-    <a href={article.link} class="editorial-title-link" {...tag}>
-      <h2 class="editorial-title">{article.title}</h2>
-    </a>
+    {#if article.external}
+      <a href={article.link} class="editorial-title-link" target="_blank" rel="noopener noreferrer">
+        <h2 class="editorial-title">{article.title}</h2>
+      </a>
+    {:else}
+      <a href={article.link} class="editorial-title-link">
+        <h2 class="editorial-title">{article.title}</h2>
+      </a>
+    {/if}
 
     <!-- Summary -->
     <p class="editorial-summary">{article.summary}</p>
 
-    <!-- Footer: source + CTA -->
+    <!-- Footer -->
     <div class="editorial-footer">
       <span class="editorial-source">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -84,16 +96,24 @@
         </svg>
         {source}
       </span>
-      <a href={article.link} class="editorial-cta" {...tag}>
-        {cta}
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
-        </svg>
-      </a>
+      {#if article.external}
+        <a href={article.link} class="editorial-cta" target="_blank" rel="noopener noreferrer">
+          {cta}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+          </svg>
+        </a>
+      {:else}
+        <a href={article.link} class="editorial-cta">
+          {cta}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+          </svg>
+        </a>
+      {/if}
     </div>
 
   </div>
-
 </article>
 
 <style>
@@ -106,10 +126,8 @@
     border-radius: calc(var(--radius) * 2);
     overflow: hidden;
     transition: box-shadow 0.2s, transform 0.2s;
-    position: relative;
   }
 
-  /* Subtle glow on hover to make them feel premium */
   .editorial-card:hover {
     box-shadow: 0 4px 32px rgba(2, 132, 199, 0.18);
     transform: translateY(-2px);
@@ -119,7 +137,6 @@
   .editorial-image-wrap {
     flex-shrink: 0;
     width: 220px;
-    min-height: 140px;
     overflow: hidden;
     background: var(--bg-muted);
     display: block;
@@ -146,7 +163,7 @@
 
   .editorial-body--no-image { padding-left: 1.25rem; }
 
-  /* ── Meta row ── */
+  /* ── Meta ── */
   .editorial-meta {
     display: flex;
     align-items: center;
@@ -168,6 +185,7 @@
     border: 1px solid var(--accent);
     border-radius: 9999px;
     padding: 0.2rem 0.55rem;
+    white-space: nowrap;
   }
 
   .editorial-category {
@@ -181,6 +199,7 @@
     border: 1px solid;
     border-radius: 9999px;
     padding: 0.2rem 0.55rem;
+    white-space: nowrap;
   }
 
   .editorial-date {
@@ -255,14 +274,11 @@
 
     .editorial-image-wrap {
       width: 100%;
-      min-height: 180px;
       aspect-ratio: 16/9;
     }
 
     .editorial-body,
-    .editorial-body--no-image {
-      padding: 1rem;
-    }
+    .editorial-body--no-image { padding: 1rem; }
 
     .editorial-date { margin-left: 0; }
   }
