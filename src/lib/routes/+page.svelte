@@ -1,4 +1,5 @@
 <script lang="ts">
+  import EditorialSection from '$lib/components/feed/EditorialSection.svelte';
   import ArticleFeed from '$lib/components/feed/ArticleFeed.svelte';
   import ArticleCard from '$lib/components/feed/ArticleCard.svelte';
   import Newsletter from '$lib/components/layout/Newsletter.svelte';
@@ -17,6 +18,12 @@
 
 <div class="home">
 
+  <!-- Your own articles — always pinned at the very top -->
+  <div class="container">
+    <EditorialSection />
+  </div>
+
+  <!-- Scraped featured articles -->
   {#if data.featured.length > 0}
     <section class="featured-section">
       <div class="container">
@@ -32,16 +39,17 @@
     </section>
   {/if}
 
+  <!-- Main feed -->
   <section class="feed-section">
     <div class="container">
       <div class="section-header">
         <span class="section-label">Latest</span>
       </div>
-      <!-- data.recent.page is used inside ArticleFeed now — no prop needed -->
       <ArticleFeed data={data.recent} />
     </div>
   </section>
 
+  <!-- Newsletter -->
   <section class="newsletter-section">
     <div class="container">
       <Newsletter />
@@ -59,11 +67,8 @@
     background: var(--bg-surface);
   }
 
-  .feed-section { padding: 2.5rem 0; }
-
-  .newsletter-section {
-    padding: 0 0 2rem;
-  }
+  .feed-section     { padding: 2.5rem 0; }
+  .newsletter-section { padding: 0 0 2rem; }
 
   .section-header { margin-bottom: 1.25rem; }
 
