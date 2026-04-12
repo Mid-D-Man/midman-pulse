@@ -2,6 +2,7 @@
   import ArticleFeed from '$lib/components/feed/ArticleFeed.svelte';
   import CategoryFilter from '$lib/components/feed/CategoryFilter.svelte';
   import AdSlot from '$lib/components/ads/AdSlot.svelte';
+  import Newsletter from '$lib/components/layout/Newsletter.svelte';
   import type { Category, PaginatedArticles } from '$lib/types';
 
   export let data: {
@@ -35,7 +36,8 @@
     <div class="category-body">
       <div class="feed-col">
         <CategoryFilter categories={data.categories} active={data.category.slug} />
-        <ArticleFeed data={data.articles} currentPage={data.currentPage} />
+        <!-- currentPage now comes from data.articles.page inside ArticleFeed -->
+        <ArticleFeed data={data.articles} />
       </div>
       <aside class="sidebar">
         <div class="sidebar-sticky">
@@ -44,13 +46,13 @@
       </aside>
     </div>
 
+    <Newsletter />
+
   </div>
 </div>
 
 <style>
-  .category-page {
-    padding: 2.5rem 0 4rem;
-  }
+  .category-page { padding: 2.5rem 0 4rem; }
 
   .category-header {
     margin-bottom: 2rem;
@@ -58,9 +60,7 @@
     border-bottom: 1px solid var(--border);
   }
 
-  .category-label-row {
-    margin-bottom: 0.5rem;
-  }
+  .category-label-row { margin-bottom: 0.5rem; }
 
   .category-kicker {
     font-size: 0.6875rem;
@@ -103,10 +103,7 @@
   }
 
   @media (max-width: 1024px) {
-    .category-body {
-      grid-template-columns: 1fr;
-    }
-
+    .category-body { grid-template-columns: 1fr; }
     .sidebar { display: none; }
   }
 </style>
