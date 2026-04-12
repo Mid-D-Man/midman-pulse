@@ -1,14 +1,18 @@
 <script lang="ts">
+  import { ADS_ENABLED } from '$lib/config';
+
   export let slot: 'banner' | 'sidebar' | 'inline' = 'inline';
   export let label: string = 'Advertisement';
 </script>
 
-<div class="ad-slot ad-slot--{slot}" aria-label={label}>
-  <span class="ad-label">{label}</span>
-  <div class="ad-placeholder">
-    <!-- ad network script goes here once approved -->
+{#if ADS_ENABLED}
+  <div class="ad-slot ad-slot--{slot}" aria-label={label}>
+    <span class="ad-label">{label}</span>
+    <div class="ad-placeholder">
+      <!-- ad network script goes here once approved -->
+    </div>
   </div>
-</div>
+{/if}
 
 <style>
   .ad-slot {
@@ -31,23 +35,9 @@
     padding-top: 0.375rem;
   }
 
-  .ad-slot--banner {
-    width: 100%;
-    min-height: 90px;
-  }
+  .ad-slot--banner  { width: 100%; min-height: 90px; }
+  .ad-slot--sidebar { width: 100%; min-height: 250px; }
+  .ad-slot--inline  { width: 100%; min-height: 100px; }
 
-  .ad-slot--sidebar {
-    width: 100%;
-    min-height: 250px;
-  }
-
-  .ad-slot--inline {
-    width: 100%;
-    min-height: 100px;
-  }
-
-  .ad-placeholder {
-    width: 100%;
-    flex: 1;
-  }
+  .ad-placeholder { width: 100%; flex: 1; }
 </style>
