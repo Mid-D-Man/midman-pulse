@@ -11,7 +11,7 @@
       <div class="footer-brand">
         <span class="brand-name">MidMan<span class="brand-accent">Pulse</span></span>
         <p class="footer-tagline">Curated intelligence. Updated continuously.</p>
-        
+        <a
           href="https://mms-accounts.pages.dev"
           class="footer-mms-cta"
           target="_blank"
