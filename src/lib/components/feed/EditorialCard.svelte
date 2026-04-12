@@ -29,7 +29,7 @@
   <!-- Image (optional) -->
   {#if article.image_url}
     {#if article.external}
-      
+      <a
         href={article.link}
         class="editorial-image-wrap"
         target="_blank"
@@ -40,7 +40,7 @@
         <img src={article.image_url} alt={article.title} class="editorial-image" loading="lazy" />
       </a>
     {:else}
-      
+      <a
         href={article.link}
         class="editorial-image-wrap"
         tabindex="-1"
