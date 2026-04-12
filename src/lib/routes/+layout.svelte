@@ -2,13 +2,16 @@
   import { onMount } from 'svelte';
   import '../../app.css';
   import { theme } from '$lib/stores/theme';
+  import { registerSW } from '$lib/pwa';
   import Nav from '$lib/components/layout/Nav.svelte';
   import Footer from '$lib/components/layout/Footer.svelte';
+  import InstallBanner from '$lib/components/pwa/InstallBanner.svelte';
 
   export let data: { categories: any[] };
 
   onMount(() => {
     theme.init();
+    registerSW();
   });
 </script>
 
@@ -18,6 +21,8 @@
     <slot />
   </main>
   <Footer />
+  <!-- PWA install/update prompts -->
+  <InstallBanner />
 </div>
 
 <style>
