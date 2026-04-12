@@ -1,0 +1,63 @@
+name: Remove Test Articles from D1
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install wrangler
+        run: npm install -g wrangler
+
+      - name: Show articles BEFORE deletion
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          echo "=== Articles currently in DB ==="
+          wrangler d1 execute midman-pulse-db --remote --command \
+            "SELECT id, title, source_url, source_name FROM mmp_articles ORDER BY id DESC LIMIT 20;"
+
+      - name: Delete test and example articles
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          wrangler d1 execute midman-pulse-db --remote --command "
+            DELETE FROM mmp_article_tags
+            WHERE article_id IN (
+              SELECT id FROM mmp_articles
+              WHERE source_url LIKE 'https://example.com/%'
+                 OR source_name IN ('Debug', 'Pipeline Test', 'Test Source')
+                 OR title LIKE 'Test Article%'
+                 OR title LIKE 'Auth Check%'
+                 OR title LIKE 'Real Feed Test%'
+            );
+
+            DELETE FROM mmp_articles
+            WHERE source_url LIKE 'https://example.com/%'
+               OR source_name IN ('Debug', 'Pipeline Test', 'Test Source')
+               OR title LIKE 'Test Article%'
+               OR title LIKE 'Auth Check%'
+               OR title LIKE 'Real Feed Test%';
+          "
+
+      - name: Show articles AFTER deletion
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          echo "=== Articles remaining after cleanup ==="
+          wrangler d1 execute midman-pulse-db --remote --command \
+            "SELECT id, title, source_name FROM mmp_articles ORDER BY id DESC LIMIT 20;"
+
+          echo "=== Total count ==="
+          wrangler d1 execute midman-pulse-db --remote --command \
+            "SELECT COUNT(*) as total FROM mmp_articles;"
