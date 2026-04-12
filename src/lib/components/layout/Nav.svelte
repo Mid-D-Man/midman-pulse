@@ -32,7 +32,7 @@
     <div class="nav-links">
       <a href="/" class="nav-link" class:active={isActive('/')}>Home</a>
       {#each categories as cat}
-        
+        <a
           href="/{cat.slug}"
           class="nav-link"
           class:active={isActive(`/${cat.slug}`)}
