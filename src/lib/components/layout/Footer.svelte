@@ -6,11 +6,25 @@
   <div class="footer-inner container">
 
     <div class="footer-top">
+
+      <!-- Brand + MMS CTA -->
       <div class="footer-brand">
         <span class="brand-name">MidMan<span class="brand-accent">Pulse</span></span>
         <p class="footer-tagline">Curated intelligence. Updated continuously.</p>
+        
+          href="https://mms-accounts.pages.dev"
+          class="footer-mms-cta"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          Get your free MmS Account
+        </a>
       </div>
 
+      <!-- Nav columns -->
       <nav class="footer-nav" aria-label="Footer navigation">
         <div class="footer-nav-col">
           <span class="footer-nav-heading">Categories</span>
@@ -25,11 +39,21 @@
           <a href="/terms">Terms of Service</a>
           <a href="/cookies">Cookie Policy</a>
         </div>
+        <div class="footer-nav-col">
+          <span class="footer-nav-heading">Powered by</span>
+          <a href="https://www.brevo.com" target="_blank" rel="noopener noreferrer">Brevo (newsletter)</a>
+          <a href="https://www.cloudflare.com" target="_blank" rel="noopener noreferrer">Cloudflare (hosting)</a>
+          <a href="https://mms-accounts.pages.dev" target="_blank" rel="noopener noreferrer">MmS Accounts</a>
+        </div>
       </nav>
+
     </div>
 
+    <!-- Bottom bar -->
     <div class="footer-bottom">
-      <p class="footer-copy">&copy; {year} MidManStudio. All rights reserved.</p>
+      <p class="footer-copy">
+        &copy; {year} MidManStudio. All rights reserved.
+      </p>
       <div class="footer-legal-links">
         <a href="/privacy">Privacy</a>
         <span class="footer-sep" aria-hidden="true">·</span>
@@ -60,20 +84,54 @@
     border-bottom: 1px solid var(--border);
   }
 
-  .footer-brand { display: flex; flex-direction: column; gap: 0.375rem; }
+  /* ── Brand ── */
+  .footer-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-width: 220px;
+  }
 
   .brand-name   { font-size: 1rem; font-weight: 700; color: var(--text); }
   .brand-accent { color: var(--accent); }
 
-  .footer-tagline { font-size: 0.8125rem; color: var(--text-muted); max-width: 220px; line-height: 1.6; }
+  .footer-tagline {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 0.375rem;
+  }
+
+  /* ── Footer MMS CTA ── */
+  .footer-mms-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.45rem 0.875rem;
+    background: var(--accent);
+    color: #fff;
+    border-radius: var(--radius);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+    width: fit-content;
+    transition: background 0.15s, transform 0.15s;
+    margin-top: 0.25rem;
+  }
+
+  .footer-mms-cta:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+  }
 
   /* ── Nav columns ── */
-  .footer-nav { display: flex; gap: 3rem; flex-wrap: wrap; }
+  .footer-nav { display: flex; gap: 2.5rem; flex-wrap: wrap; }
 
   .footer-nav-col {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    min-width: 120px;
   }
 
   .footer-nav-heading {
@@ -91,6 +149,7 @@
     color: var(--text-muted);
     text-decoration: none;
     transition: color 0.15s;
+    width: fit-content;
   }
 
   .footer-nav-col a:hover { color: var(--accent); }
@@ -120,13 +179,13 @@
   }
 
   .footer-legal-links a:hover { color: var(--accent); }
-
   .footer-sep { color: var(--border); font-size: 0.75rem; }
 
   /* ── Responsive ── */
-  @media (max-width: 640px) {
-    .footer-top     { flex-direction: column; }
-    .footer-nav     { gap: 1.5rem; }
-    .footer-bottom  { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+  @media (max-width: 768px) {
+    .footer-top    { flex-direction: column; }
+    .footer-nav    { gap: 1.5rem; }
+    .footer-brand  { max-width: 100%; }
+    .footer-bottom { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
   }
 </style>
