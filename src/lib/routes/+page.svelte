@@ -1,6 +1,7 @@
 <script lang="ts">
   import ArticleFeed from '$lib/components/feed/ArticleFeed.svelte';
   import ArticleCard from '$lib/components/feed/ArticleCard.svelte';
+  import Newsletter from '$lib/components/layout/Newsletter.svelte';
   import type { Article, PaginatedArticles } from '$lib/types';
 
   export let data: {
@@ -10,7 +11,7 @@
 </script>
 
 <svelte:head>
-  <title>MidMan Pulse — AI, Cybersecurity & Business Intelligence</title>
+  <title>MidMan Pulse — AI, Cybersecurity &amp; Business Intelligence</title>
   <meta name="description" content="Curated intelligence on agentic AI, cybersecurity threats, and profit-driven business tools. Updated every few hours." />
 </svelte:head>
 
@@ -36,16 +37,21 @@
       <div class="section-header">
         <span class="section-label">Latest</span>
       </div>
+      <!-- data.recent.page is used inside ArticleFeed now — no prop needed -->
       <ArticleFeed data={data.recent} />
+    </div>
+  </section>
+
+  <section class="newsletter-section">
+    <div class="container">
+      <Newsletter />
     </div>
   </section>
 
 </div>
 
 <style>
-  .home {
-    padding-bottom: 4rem;
-  }
+  .home { padding-bottom: 4rem; }
 
   .featured-section {
     padding: 2.5rem 0 2rem;
@@ -53,13 +59,13 @@
     background: var(--bg-surface);
   }
 
-  .feed-section {
-    padding: 2.5rem 0;
+  .feed-section { padding: 2.5rem 0; }
+
+  .newsletter-section {
+    padding: 0 0 2rem;
   }
 
-  .section-header {
-    margin-bottom: 1.25rem;
-  }
+  .section-header { margin-bottom: 1.25rem; }
 
   .section-label {
     font-size: 0.6875rem;
