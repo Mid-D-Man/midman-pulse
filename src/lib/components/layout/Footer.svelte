@@ -11,7 +11,7 @@
       <div class="footer-brand">
         <span class="brand-name">MidMan<span class="brand-accent">Pulse</span></span>
         <p class="footer-tagline">Curated intelligence. Updated continuously.</p>
-        <a
+        
           href="https://mms-accounts.pages.dev"
           class="footer-mms-cta"
           target="_blank"
@@ -38,12 +38,6 @@
           <a href="/privacy">Privacy Policy</a>
           <a href="/terms">Terms of Service</a>
           <a href="/cookies">Cookie Policy</a>
-        </div>
-        <div class="footer-nav-col">
-          <span class="footer-nav-heading">Powered by</span>
-          <a href="https://www.brevo.com" target="_blank" rel="noopener noreferrer">Brevo (newsletter)</a>
-          <a href="https://www.cloudflare.com" target="_blank" rel="noopener noreferrer">Cloudflare (hosting)</a>
-          <a href="https://mms-accounts.pages.dev" target="_blank" rel="noopener noreferrer">MmS Accounts</a>
         </div>
       </nav>
 
