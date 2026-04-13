@@ -39,22 +39,26 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// ── Message: skip waiting (triggered by applyUpdate()) ────────
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
+});
+
 // ── Fetch ─────────────────────────────────────────────────────
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET and cross-origin (ads, fonts CDN handled separately)
   if (request.method !== 'GET') return;
   if (url.origin !== self.location.origin) return;
 
   // Images → cache first
   if (request.destination === 'image') {
-    event.respondWith(cacheFirst(request, IMAGES_CACHE, 200));
+    event.respondWith(cacheFirst(request, IMAGES_CACHE));
     return;
   }
 
-  // Static assets (JS, CSS, fonts) → cache first
+  // Static assets (JS, CSS, fonts, icons) → cache first
   if (
     url.pathname.startsWith('/_app/') ||
     url.pathname.startsWith('/icons/') ||
@@ -62,11 +66,11 @@ self.addEventListener('fetch', (event) => {
     url.pathname.endsWith('.css') ||
     url.pathname.endsWith('.woff2')
   ) {
-    event.respondWith(cacheFirst(request, SHELL_CACHE, 365));
+    event.respondWith(cacheFirst(request, SHELL_CACHE));
     return;
   }
 
-  // HTML pages (articles, categories, home) → network first
+  // HTML pages → network first with offline fallback
   if (request.headers.get('accept')?.includes('text/html')) {
     event.respondWith(networkFirst(request, PAGES_CACHE));
     return;
@@ -75,9 +79,9 @@ self.addEventListener('fetch', (event) => {
 
 // ── Strategies ────────────────────────────────────────────────
 
-async function cacheFirst(request, cacheName, maxAgeDays) {
-  const cache    = await caches.open(cacheName);
-  const cached   = await cache.match(request);
+async function cacheFirst(request, cacheName) {
+  const cache  = await caches.open(cacheName);
+  const cached = await cache.match(request);
   if (cached) return cached;
 
   try {
@@ -98,7 +102,6 @@ async function networkFirst(request, cacheName) {
   } catch {
     const cached = await cache.match(request);
     if (cached) return cached;
-    // Fall back to offline page
     const offline = await caches.match('/offline');
     return offline ?? new Response('You are offline', { status: 503 });
   }
