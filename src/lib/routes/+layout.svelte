@@ -6,6 +6,7 @@
   import Nav from '$lib/components/layout/Nav.svelte';
   import Footer from '$lib/components/layout/Footer.svelte';
   import InstallBanner from '$lib/components/pwa/InstallBanner.svelte';
+  import CookieBanner from '$lib/components/ui/CookieBanner.svelte';
 
   export let data: { categories: any[] };
 
@@ -21,8 +22,8 @@
     <slot />
   </main>
   <Footer />
-  <!-- PWA install/update prompts -->
   <InstallBanner />
+  <CookieBanner />
 </div>
 
 <style>
