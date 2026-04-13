@@ -1,24 +1,12 @@
 <script lang="ts">
   /**
-   * Newsletter signup — powered by Brevo (formerly Sendinblue)
-   * ─────────────────────────────────────────────────────────────
-   * SETUP STEPS:
-   *  1. Go to brevo.com → free account (300 emails/day free forever)
-   *  2. Contacts → Subscription Forms → Create a form
-   *  3. Choose "Embedded form" → copy the action="..." URL
-   *  4. Paste it into BREVO_FORM_ACTION below
-   *  5. Also copy the list ID from the form URL or Brevo dashboard
-   *     and paste into BREVO_LIST_ID (used for the hidden field)
-   * ─────────────────────────────────────────────────────────────
+   * Newsletter signup widget.
+   * Set FORM_ACTION to your email provider's form endpoint.
+   * Works with Brevo, Mailchimp, ConvertKit, etc.
    */
 
-  // ── CONFIGURE THESE TWO VALUES ────────────────────────────────
-  const BREVO_FORM_ACTION = 'https://app.brevo.com/newsletter/form/YOUR_FORM_ID';
-  //  ^ Replace with your actual Brevo form action URL
-  const BREVO_LIST_ID = ''; // optional: Brevo contact list ID e.g. '3'
-  // ─────────────────────────────────────────────────────────────
-
-  const IS_CONFIGURED = !BREVO_FORM_ACTION.includes('YOUR_FORM_ID');
+  const FORM_ACTION = 'https://app.brevo.com/newsletter/form/YOUR_FORM_ID';
+  const IS_CONFIGURED = !FORM_ACTION.includes('YOUR_FORM_ID');
 
   let email   = '';
   let state: 'idle' | 'loading' | 'success' | 'error' = 'idle';
@@ -26,7 +14,7 @@
 
   async function submit() {
     if (!IS_CONFIGURED) {
-      message = 'Newsletter not yet configured — check Newsletter.svelte';
+      message = 'Newsletter signup is coming soon — check back shortly.';
       state   = 'error';
       return;
     }
@@ -42,11 +30,8 @@
     try {
       const body = new FormData();
       body.append('EMAIL', email);
-      if (BREVO_LIST_ID) body.append('list', BREVO_LIST_ID);
 
-      // mode: no-cors because Brevo form endpoint doesn't allow cross-origin reads
-      // but it still processes the submission correctly
-      await fetch(BREVO_FORM_ACTION, { method: 'POST', body, mode: 'no-cors' });
+      await fetch(FORM_ACTION, { method: 'POST', body, mode: 'no-cors' });
 
       state   = 'success';
       message = "You're in! Check your inbox to confirm your subscription.";
@@ -66,12 +51,12 @@
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
         </svg>
-        <span>Newsletter — free, via Brevo</span>
+        <span>Free Newsletter</span>
       </div>
       <h3 class="newsletter-title">Stay in the loop</h3>
       <p class="newsletter-sub">
         AI, cybersecurity, and business intel — hand-curated and delivered to your inbox.
-        No spam, unsubscribe any time.
+        No spam. Unsubscribe any time.
       </p>
     </div>
 
@@ -121,9 +106,7 @@
         {/if}
 
         <p class="newsletter-note">
-          Powered by <a href="https://www.brevo.com" target="_blank" rel="noopener noreferrer">Brevo</a>.
-          Free plan · 300 emails/day.
-          See our <a href="/privacy">Privacy Policy</a>.
+          Free newsletter. No spam. See our <a href="/privacy">Privacy Policy</a>.
         </p>
       </div>
     {/if}
@@ -149,7 +132,6 @@
     margin: 0 auto;
   }
 
-  /* ── Eyebrow ── */
   .newsletter-eyebrow {
     display: flex;
     align-items: center;
@@ -176,7 +158,6 @@
     line-height: 1.7;
   }
 
-  /* ── Form ── */
   .newsletter-form-wrap {
     display: flex;
     flex-direction: column;
@@ -233,7 +214,6 @@
 
   .newsletter-btn:disabled { opacity: 0.65; cursor: not-allowed; }
 
-  /* ── Spinner inside button ── */
   .newsletter-spinner {
     display: inline-block;
     width: 13px;
@@ -267,7 +247,6 @@
 
   .newsletter-note a:hover { color: var(--accent); }
 
-  /* ── Success state ── */
   .newsletter-success {
     display: flex;
     align-items: flex-start;
@@ -297,7 +276,6 @@
     line-height: 1.6;
   }
 
-  /* ── Responsive ── */
   @media (max-width: 768px) {
     .newsletter-inner { grid-template-columns: 1fr; gap: 1.25rem; }
   }
